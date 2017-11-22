@@ -1,0 +1,24 @@
+You can detect high-multi-collinearity by inspecting the eigen values of correlation matrix. A very low eigen value shows that the data are collinear, and the corresponding eigen vector shows which variables are collinear.
+If there is no collinearity in the data, you would expect that none of the eigen values are close to zero:
+>>> xs = np.random.randn(100, 5)      # independent variables
+>>> corr = np.corrcoef(xs, rowvar=0)  # correlation matrix
+>>> w, v = np.linalg.eig(corr)        # eigen values & eigen vectors
+>>> w
+array([ 1.256 ,  1.1937,  0.7273,  0.9516,  0.8714])
+However, if say x[4] - 2 * x[0] - 3 * x[2] = 0, then
+>>> noise = np.random.randn(100)                      # white noise
+>>> xs[:,4] = 2 * xs[:,0] + 3 * xs[:,2] + .5 * noise  # collinearity
+>>> corr = np.corrcoef(xs, rowvar=0)
+>>> w, v = np.linalg.eig(corr)
+>>> w
+array([ 0.0083,  1.9569,  1.1687,  0.8681,  0.9981])
+one of the eigen values (here the very first one), is close to zero. The corresponding eigen vector is:
+>>> v[:,0]
+array([-0.4077,  0.0059, -0.5886,  0.0018,  0.6981])
+Ignoring almost zero coefficients, above basically says x[0], x[2] and x[4] are colinear (as expected). If one standardizes xs values and multiplies by this eigen vector, the result will hover around zero with small variance:
+>>> std_xs = (xs - xs.mean(axis=0)) / xs.std(axis=0)  # standardized values
+>>> ys = std_xs.dot(v[:,0])
+>>> ys.mean(), ys.var()
+(0, 0.0083)
+Note that ys.var() is basically the eigen value which was close to zero.
+So, in order to capture high multi-linearity, look at the eigen values of correlation matrix.
