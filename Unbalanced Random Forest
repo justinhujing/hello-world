@@ -1,0 +1,28 @@
+library(randomForest)
+iris = read.table("http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data", sep = ",", header = FALSE)
+names(iris) = c("sepal.length", "sepal.width", "petal.length", "petal.width", "iris.type")
+
+model = randomForest(iris.type ~ sepal.length + sepal.width, 
+                     data = iris, 
+                     sampsize=c(10,10,10), strata=iris$iris.type)
+
+
+##An Alternative as below##
+library(caret)
+set.seed(1401)
+rf = train(class ~ .,
+           data = training,
+           method = "rf",
+           ntree = 500,
+           strata = training$class,
+           sampsize = rep(sum(training$class == 1), 2),
+           metric = "ROC")
+testing$rf = predict(rf, testing, type = "prob")[,1]
+
+library(pROC)
+auc <- roc(testing$class, testing$rf, levels = rev(levels(training$class)))
+plot(auc, col = rgb(1, 0, 0, .5), lwd = 2)
+
+
+##Alternative in Python Scikit-learn##
+RandomforestClasscifier(class_weight =).fit(sample_weight =)
